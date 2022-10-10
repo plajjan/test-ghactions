@@ -21,8 +21,7 @@ jobs:
       - name: "Enable dumping core files"
         run: |
           ulimit -c unlimited
-          sudo sysctl kernel.core_pattern=/cores/core.%P
-          sudo chmod a+w /cores
+          sudo sysctl kernel.core_pattern=/tmp/core.%P
       - name: "Build project"
         run: |
           cc instant_segfault.c -o instant_segfault
@@ -33,6 +32,6 @@ jobs:
         with:
           name: test-debug-${{ matrix.os }}-${{ github.run_id }}
           path: |
-            /cores
+            /tmp/core.*
             ${{ github.workspace }}/test/db*.log
             ${{ github.workspace }}/test/rts_db
