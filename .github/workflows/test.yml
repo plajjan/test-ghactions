@@ -21,6 +21,7 @@ jobs:
       - name: "Enable dumping core files"
         run: |
           ulimit -c unlimited
+          sudo sysctl kernel.core_pattern
           sudo sysctl kernel.core_pattern=/tmp/core.%P
       - name: "Build project"
         run: |
