@@ -17,12 +17,12 @@ jobs:
         run: |
           export DEBIAN_FRONTEND=noninteractive
           apt-get update
-          apt-get install -qy gcc procps
+          apt-get install -qy gcc procps sudo
       - name: "Enable dumping core files"
         run: |
           ulimit -c unlimited
-          sysctl kernel.core_pattern=/cores/core.%P
-          chmod a+w /cores
+          sudo sysctl kernel.core_pattern=/cores/core.%P
+          sudo chmod a+w /cores
       - name: "Build project"
         run: |
           cc instant_segfault.c -o instant_segfault
