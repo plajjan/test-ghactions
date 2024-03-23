@@ -21,6 +21,8 @@ jobs:
           ulimit -a
       - name: "Build project"
         run: |
+          ulimit -c unlimited
+          ulimit -a
           cc instant_segfault.c -o instant_segfault
           ./instant_segfault
       - name: "Build project"
