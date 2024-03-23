@@ -4,35 +4,67 @@ on:
   push:
 
 jobs:
-  test-test:
-    runs-on: ubuntu-latest
-    container:
-      image: debian:11
-      options: --privileged --ulimit core=-1 --security-opt seccomp=unconfined
+  test-macos:
+    runs-on: macos-13
     steps:
       - name: "Check out repository code"
-        uses: actions/checkout@v2
-      - name: "Install build prerequisites"
-        run: |
-          export DEBIAN_FRONTEND=noninteractive
-          apt-get update
-          apt-get install -qy gcc procps sudo
+        uses: actions/checkout@v3
       - name: "Enable dumping core files"
         run: |
+          sudo sysctl kern.corefile=core.%P
+          ulimit -a
           ulimit -c unlimited
-          sudo sysctl kernel.core_pattern=/cores/core.%P
-          sudo mkdir /cores
-          sudo chmod a+w /cores
+      - name: "Check"
+        run: |
+          sudo sysctl kern.corefile
+          ulimit -a
       - name: "Build project"
         run: |
           cc instant_segfault.c -o instant_segfault
           ./instant_segfault
+      - name: "Build project"
+        if: failure()
+        run: |
+          ls
+          ls /core
       - name: "Upload core file & binaries as artifacts on test failure"
         if: failure()
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: test-debug-${{ matrix.os }}-${{ github.run_id }}
+          name: test-debug
           path: |
             /cores/core.*
-            ${{ github.workspace }}/test/db*.log
-            ${{ github.workspace }}/test/rts_db
+            ${{ github.workspace }}/core.*
+
+#  test-test:
+#    runs-on: ubuntu-latest
+#    container:
+#      image: debian:11
+#      options: --privileged --ulimit core=-1 --security-opt seccomp=unconfined
+#    steps:
+#      - name: "Check out repository code"
+#        uses: actions/checkout@v2
+#      - name: "Install build prerequisites"
+#        run: |
+#          export DEBIAN_FRONTEND=noninteractive
+#          apt-get update
+#          apt-get install -qy gcc procps sudo
+#      - name: "Enable dumping core files"
+#        run: |
+#          ulimit -c unlimited
+#          sudo sysctl kernel.core_pattern=/cores/core.%P
+#          sudo mkdir /cores
+#          sudo chmod a+w /cores
+#      - name: "Build project"
+#        run: |
+#          cc instant_segfault.c -o instant_segfault
+#          ./instant_segfault
+#      - name: "Upload core file & binaries as artifacts on test failure"
+#        if: failure()
+#        uses: actions/upload-artifact@v2
+#        with:
+#          name: test-debug-${{ matrix.os }}-${{ github.run_id }}
+#          path: |
+#            /cores/core.*
+#            ${{ github.workspace }}/test/rts_db
+#            ${{ github.workspace }}/test/rts_db/ddb*
