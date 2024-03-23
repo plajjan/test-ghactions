@@ -14,6 +14,7 @@ jobs:
           sudo sysctl kern.corefile=core.%P
           ulimit -a
           ulimit -c unlimited
+          ulimit -a
       - name: "Check"
         run: |
           sudo sysctl kern.corefile
